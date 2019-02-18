@@ -14,13 +14,12 @@
         @input="filterAllBooks"
         class="searchInput"
         size="small"
-      >></el-input>
+      ></el-input>
     </div>
     <el-table
       :data="tableData"
       border
-      v-loading="loading"
-      style="width: 100%"
+      style="width: 70%"
       @row-click="clickRowTable"
       size="small"
       :default-sort="{prop: 'author', order: 'ascending'}"
@@ -35,57 +34,72 @@
           <i class="el-icon-close" @click="closeModalWindow"></i>
         </div>
         <el-main>
-          <div class="inputText">Id*</div>
-          <el-input
-            placeholder="Please input"
-            v-model="chooseBook.id"
-            size="small"
-            :disabled="disabledFields"
-          ></el-input>
-          <div class="inputText">Name*</div>
-          <el-input
-            placeholder="Please input"
-            v-model="chooseBook.name"
-            size="small"
-            :disabled="disabledFields"
-          ></el-input>
-          <div class="inputText">Author*</div>
-          <el-input
-            placeholder="Please input"
-            v-model="chooseBook.author"
-            size="small"
-            :disabled="disabledFields"
-          ></el-input>
-          <div class="inputText">Country</div>
-          <el-input
-            placeholder="Please input"
-            v-model="chooseBook.country"
-            size="small"
-            :disabled="disabledFields"
-          ></el-input>
-          <div class="inputText">Language</div>
-          <el-input
-            placeholder="Please input"
-            v-model="chooseBook.language"
-            size="small"
-            :disabled="disabledFields"
-          ></el-input>
-          <div class="inputText">Year</div>
-          <el-input
-            placeholder="Please input"
-            v-model="chooseBook.year"
-            size="small"
-            :disabled="disabledFields"
-          ></el-input>
-          <div class="inputText">Pages</div>
-          <el-input
-            placeholder="Please input"
-            v-model="chooseBook.pages"
-            size="small"
-            :disabled="disabledFields"
-          ></el-input>
+          <div class="textBlock">
+            <div class="inputText">Id*</div>
+            <el-input
+              placeholder="Please input"
+              v-model="chooseBook.id"
+              size="small"
+              :disabled="disabledFields"
+            ></el-input>
+            <div class="inputText">Name*</div>
+            <el-input
+              placeholder="Please input"
+              v-model="chooseBook.name"
+              size="small"
+              :disabled="disabledFields"
+            ></el-input>
+            <div class="inputText">Author*</div>
+            <el-input
+              placeholder="Please input"
+              v-model="chooseBook.author"
+              size="small"
+              :disabled="disabledFields"
+            ></el-input>
+            <div class="inputText">Country</div>
+            <el-input
+              placeholder="Please input"
+              v-model="chooseBook.country"
+              size="small"
+              :disabled="disabledFields"
+            ></el-input>
+            <div class="inputText">Language</div>
+            <el-input
+              placeholder="Please input"
+              v-model="chooseBook.language"
+              size="small"
+              :disabled="disabledFields"
+            ></el-input>
+            <div class="inputText">Year</div>
+            <el-input
+              placeholder="Please input"
+              v-model="chooseBook.year"
+              size="small"
+              :disabled="disabledFields"
+            ></el-input>
+            <div class="inputText">Pages</div>
+            <el-input
+              placeholder="Please input"
+              v-model="chooseBook.pages"
+              size="small"
+              :disabled="disabledFields"
+            ></el-input>
+          </div>
+          <div class="bookImg">
+            <el-upload
+              class="avatar-uploader"
+              action="https://jsonplaceholder.typicode.com/posts/"
+              :show-file-list="false"
+              :on-success="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload"
+            >
+              <img v-if="imageUrl" :src="imageUrl" class="avatar">
+              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            </el-upload>
+          </div>
         </el-main>
         <div class="buttons">
+          <el-button type="success" size="small" v-bind:style="{display: activeGetButton}">Get this book</el-button>
           <el-button
             type="primary"
             size="small"
@@ -117,7 +131,7 @@
       <el-pagination
         layout="prev,pager,next"
         :total="amountBooks"
-        :page-size="10"
+        :page-size="14"
         @current-change="clickPagPanel"
       ></el-pagination>
     </div>
@@ -129,6 +143,7 @@ import { async, nextTick } from "q";
 import axios from "axios";
 import { requestAddressValid } from "./../config";
 import { requestAddress } from "./../config";
+import { requestAddressValidText } from "./../config";
 
 export default {
   name: "booksTable",
@@ -138,7 +153,6 @@ export default {
 
   data() {
     return {
-      loading: true,
       tableData: [],
       amountBooks: 0,
       activeDisplay: "none",
@@ -149,7 +163,9 @@ export default {
       activeButtonDelete: "inline",
       activeButtonSave: "none",
       disabledButtonSave: true,
-      serachInput: ""
+      serachInput: "",
+      pagPage: "",
+      activeGetButton: 'none'
     };
   },
 
@@ -159,7 +175,7 @@ export default {
         filters: [
           {
             field: "id",
-            value: "0",
+            value: "",
             exp: "!="
           }
         ],
@@ -168,6 +184,8 @@ export default {
         page: `${num}`,
         allObjects: true
       });
+      console.log(request);
+
       let booksArr = request.data.result.list;
       booksArr.forEach(element => {
         let booksField = {
@@ -238,7 +256,7 @@ export default {
       if (event > 0) {
         event = event - 1;
       }
-
+      this.pagPage = event;
       if (this.serachInput === "") {
         console.log("pag all");
         // console.log(event);
@@ -260,6 +278,7 @@ export default {
       this.activeButtonCancel = "none";
       this.activeButtonDelete = "none";
       this.activeButtonChange = "none";
+      this.activeGetButton = 'none'
       // console.log(this.chooseBook.id);
     },
 
@@ -269,54 +288,89 @@ export default {
       this.chooseBook = event;
       // console.log(this.bookObj);
       // console.log(this.tableData);
+      this.activeGetButton = 'inline'
     },
 
     saveChanges: async function() {
-      // console.log("book", this.chooseBook.id);
       if (
         this.chooseBook.id &&
         this.chooseBook.name &&
         this.chooseBook.author !== undefined
       ) {
-        let updateRequest = await axios.post(requestAddressValid, {
-          author: this.chooseBook.author,
-          country: this.chooseBook.country,
-          id: this.chooseBook.id,
-          language: this.chooseBook.language,
-          name: this.chooseBook.name,
-          pages: this.chooseBook.pages,
-          year: this.chooseBook.year,
-          isDelete: false,
-          isComplete: ""
-        });
-        // console.log("request", updateRequest.config.data);
-        let newObj = JSON.parse(updateRequest.config.data);
-        console.log(newObj);
-        this.tableData.push(newObj);
-        this.amountBooks = this.tableData.length;
-        this.activeDisplay = "none";
+        let updateRequest = await axios
+          .post(requestAddressValid, {
+            author: this.chooseBook.author,
+            country: this.chooseBook.country,
+            id: this.chooseBook.id,
+            language: this.chooseBook.language,
+            name: this.chooseBook.name,
+            pages: this.chooseBook.pages,
+            year: this.chooseBook.year,
+            isDelete: false,
+            isComplete: ""
+          })
+          .then(response => {
+            this.activeButtonCancel='none'
+            this.activeButtonChange='inline'
+            this.disabledFields='true'
+            console.log(response);
+            const respText = response.data.result.obj.obj.respText;
+            console.log(respText);
+            this.tableData.splice(0, this.tableData.length);
+            this.getAllBooks(this.pagPage);
+            this.activeDisplay = "none";
+            this.$notify({
+              title: "Успешно",
+              message: respText,
+              type: "success"
+            });
+          })
+          .catch(e => {
+            this.$notify.error({
+              title: "Ошибка",
+              message: "Сохранение не выполнено"
+            });
+          });
       } else {
         this.$notify.error({
-          title: "Error",
-          message: "Please,Enter starred values"
+          title: "Ошибка",
+          message: "Заполните необходимые поля"
         });
         return;
       }
     },
 
     deleteBook: async function() {
-      let deleteBook = await axios.post(requestAddressValid, {
-        id: this.chooseBook.id,
-        isDelete: true
-      });
-      console.log(deleteBook.data.result.lastObjectID);
-      let result = this.tableData.filter(
-        elem => elem.id !== deleteBook.data.result.lastObjectID
-      );
-      console.log(result);
-      this.tableData = result;
-      this.amountBooks = result.length;
-      this.activeDisplay = "none";
+      let deleteBook = await axios
+        .post(requestAddressValid, {
+          id: this.chooseBook.id,
+          isDelete: true
+        })
+        .then(response => {
+          // let result = this.tableData.filter(
+          //   elem => elem.id !== response.data.result.lastObjectID
+          // );
+          // console.log(result);
+          // this.tableData = result;
+          // this.amountBooks = result.length;
+          this.tableData.splice(0, this.tableData.length);
+          this.getAllBooks(this.pagPage);
+          this.activeDisplay = "none";
+          const respText = response.data.result.obj.obj.respText;
+          this.$notify({
+            title: "Успешно",
+            message: respText,
+            type: "success"
+          });
+          // console.log(response);
+        })
+        .catch(e => {
+          // console.log(e);
+          this.$notify.error({
+            title: "Ошибка",
+            message: "Удаление не выполнено"
+          });
+        });
     },
 
     closeModalWindow() {
@@ -349,7 +403,6 @@ export default {
 
   created: function() {
     this.getAllBooks(0);
-    this.loading = false;
   }
 };
 </script>
@@ -373,18 +426,20 @@ body {
 .header {
   display: flex;
   padding: 0;
-  justify-content: space-between;
+  justify-content: space-around;
+  width: 85%;
 }
 .buttons {
   padding-bottom: 10px;
 }
 .inputText {
   display: flex;
-  font-size: 12px;
+  font-size: 10px;
   padding: 5px 0px 5px 0px;
 }
 .flex {
   flex-direction: column;
+  align-items: center;
 }
 .buttonAdd {
   width: 15%;
@@ -394,7 +449,6 @@ body {
   width: 50%;
 }
 .tableBooks {
-  position: initial;
 }
 .top {
   display: flex;
@@ -405,6 +459,33 @@ body {
   padding-right: 10px;
 }
 .el-main {
-  padding: 15px;
+  padding: 0px 0px 15px 15px;
+  display: flex;
+}
+.avatar-uploader {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  line-height: 178px;
+  text-align: center;
+}
+.avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+.bookImg{
+  padding: 20px 0px 0px 10px;
 }
 </style>
