@@ -86,20 +86,37 @@
             ></el-input>
           </div>
           <div class="bookImg">
-            <el-upload
+            <!-- <el-upload
               class="avatar-uploader"
-              action="https://jsonplaceholder.typicode.com/posts/"
+              :action="getAvatarBook"
               :show-file-list="false"
-              :on-success="handleAvatarSuccess"
-              :before-upload="beforeAvatarUpload"
+              :on-success="handleAvatarChange"
+              :data='dataReq'
             >
-              <img v-if="imageUrl" :src="imageUrl" class="avatar">
-              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-            </el-upload>
+            </el-upload> -->
+
+            <img v-if="chooseBook.avatar" :src="chooseBook.avatar" class="avatarImage">
+            <img v-else src="../assets/open-book.svg" class="avatarImage">
+            <div class="inputText cover" 
+            v-bind:style="{display: disabledCoverImg}">
+            Сover
+              <el-input
+                placeholder="Please input"
+                v-model="chooseBook.avatar"
+                size="small"
+              ></el-input>                
+            </div>
+   
+            <!-- <input type="file" @onchange='handleAvatarChange'>
+            <input type="file" :onchange="handleAvatarChange()"> -->
           </div>
         </el-main>
         <div class="buttons">
-          <el-button type="success" size="small" v-bind:style="{display: activeGetButton}">Get this book</el-button>
+          <el-button
+            type="success"
+            size="small"
+            v-bind:style="{display: activeGetButton}"
+          >Get this book</el-button>
           <el-button
             type="primary"
             size="small"
@@ -156,7 +173,7 @@ export default {
       tableData: [],
       amountBooks: 0,
       activeDisplay: "none",
-      chooseBook: "",
+      chooseBook: "",   
       disabledFields: true,
       activeButtonChange: "inline",
       activeButtonCancel: "none",
@@ -165,7 +182,8 @@ export default {
       disabledButtonSave: true,
       serachInput: "",
       pagPage: "",
-      activeGetButton: 'none'
+      activeGetButton: "none",
+      disabledCoverImg:'inline'
     };
   },
 
@@ -179,7 +197,7 @@ export default {
             exp: "!="
           }
         ],
-        fields: "id,name,author,year,country,language,pages",
+        fields: "id,name,author,year,country,language,pages,link,pic",
         pageSize: 14,
         page: `${num}`,
         allObjects: true
@@ -195,9 +213,15 @@ export default {
           language: element.obj.language,
           name: element.obj.name,
           pages: element.obj.pages,
-          year: element.obj.year
+          year: element.obj.year,
+          avatar: element.obj.pic,
+          link: element.obj.link
         };
         this.tableData.push(booksField);
+        console.log(this.tableData);
+        if(booksField.link === ""){
+          this.activeGetButton = 'none'
+        }
         this.amountBooks = request.data.result.pageInfo.tableSize;
       });
     },
@@ -221,7 +245,7 @@ export default {
             ]
           }
         ],
-        fields: "id,name,author,year,country,language,pages",
+        fields: "id,name,author,year,country,language,pages,link,pic",
         pageSize: 14,
         allObjects: true,
         page: `${num}`
@@ -235,12 +259,22 @@ export default {
           language: element.obj.language,
           name: element.obj.name,
           pages: element.obj.pages,
-          year: element.obj.year
+          year: element.obj.year,
+          avatar: element.obj.pic,
+          link: element.obj.link
         };
         this.tableData.splice(0, 0, foundBooks);
+        if(foundBooks.link !== "") {
+        this.activeGetButton = 'none'
+        }
       });
       this.amountBooks = searchRequest.data.result.pageInfo.tableSize;
     },
+
+    // handleAvatarChange (file) {
+    //   console.log(file);
+      
+    // },
 
     filterAllBooks: async function() {
       if (this.serachInput === "") {
@@ -278,7 +312,7 @@ export default {
       this.activeButtonCancel = "none";
       this.activeButtonDelete = "none";
       this.activeButtonChange = "none";
-      this.activeGetButton = 'none'
+      this.activeGetButton = "none";
       // console.log(this.chooseBook.id);
     },
 
@@ -288,7 +322,7 @@ export default {
       this.chooseBook = event;
       // console.log(this.bookObj);
       // console.log(this.tableData);
-      this.activeGetButton = 'inline'
+      this.activeGetButton = "inline";
     },
 
     saveChanges: async function() {
@@ -306,13 +340,16 @@ export default {
             name: this.chooseBook.name,
             pages: this.chooseBook.pages,
             year: this.chooseBook.year,
+            bookAvatar: this.chooseBook.avatar,
+            link:this.chooseBook.link,
             isDelete: false,
             isComplete: ""
           })
           .then(response => {
-            this.activeButtonCancel='none'
-            this.activeButtonChange='inline'
-            this.disabledFields='true'
+            this.activeButtonCancel = "none";
+            this.activeButtonChange = "inline";
+            this.disabledFields = true;
+            this.disabledCoverImg = 'none'
             console.log(response);
             const respText = response.data.result.obj.obj.respText;
             console.log(respText);
@@ -380,6 +417,7 @@ export default {
       this.activeButtonCancel = "none";
       this.activeButtonDelete = "inline";
       this.activeButtonSave = "none";
+      this.disabledCoverImg = 'none'
     },
 
     changeFields() {
@@ -389,6 +427,7 @@ export default {
       this.activeButtonCancel = "inline";
       this.activeButtonDelete = "none";
       this.activeButtonSave = "inline";
+      this.disabledCoverImg = 'inline'
     },
 
     cancelChangedFields() {
@@ -396,6 +435,7 @@ export default {
       this.activeButtonCancel = "none";
       this.activeButtonDelete = "inline";
       this.activeButtonSave = "none";
+      this.disabledCoverImg = 'none'
     }
   },
 
@@ -403,6 +443,7 @@ export default {
 
   created: function() {
     this.getAllBooks(0);
+
   }
 };
 </script>
@@ -448,8 +489,6 @@ body {
 .searchInput {
   width: 50%;
 }
-.tableBooks {
-}
 .top {
   display: flex;
   justify-content: flex-end;
@@ -462,30 +501,19 @@ body {
   padding: 0px 0px 15px 15px;
   display: flex;
 }
-.avatar-uploader {
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.avatar-uploader .el-upload:hover {
-  border-color: #409EFF;
-}
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 178px;
-  height: 178px;
-  line-height: 178px;
-  text-align: center;
-}
-.avatar {
-  width: 178px;
+.avatarImage {
   height: 178px;
   display: block;
+  padding-left: 20px;
 }
-.bookImg{
+.bookImg {
   padding: 20px 0px 0px 10px;
+}
+.cover{
+  display: flex;
+  flex-direction: column;
+}
+.el-table{
+  position: initial;
 }
 </style>
