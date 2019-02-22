@@ -1,20 +1,20 @@
 <template>
   <el-container class="flex">
     <div class="authWindow" v-bind:style="{display:activeAuthWindow}">
-      <div class="inputText">Login</div>
+      <div class="inputText authText">Login</div>
       <el-input
         placeholder="Please login"
         v-model="user.login"
         @input="filterAllBooks"
-        class="searchInput"
+        class="searchInput authInput"
         size="small"
       ></el-input>
-      <div class="inputText">Password</div>
+      <div class="inputText authText">Password</div>
       <el-input
         placeholder="Please password"
         v-model="user.password"
         @input="filterAllBooks"
-        class="searchInput"
+        class="searchInput authInput"
         size="small"
       ></el-input>
       <el-button type="primary" class="okButton" @click="requestForUser" size="small">OK</el-button>
@@ -225,61 +225,70 @@ export default {
 
   methods: {
     createNewUser: async function() {
-      this.user.role = "user";
+      // this.user.role = "user";
+      // let newUser = await axios.post(
+      //   "https://directual.com/good/api/v3/struct/WebUser/?appID=d35b5f25-1215-411d-8775-d49cec6b4a3f&appSecret=ubOxrtQiduM",
+      //   {
+      //     role: this.user.role,
+      //     email: this.user.login,
+      //     password: this.user.password
+      //   }
+      // );
+    },
+
+    requestForUser: async function() {
+      // let getUser = await axios.post(getUserAddress, {
+      //   filters: [],
+      //   fields: "role,email,password",
+      //   pageSize: 10,
+      //   orders: []
+      // });
+      // console.log(getUser.data.result.list);
+      // let adminInfo = getUser.data.result.list[1].obj;
+      // let userAuth = getUser.data.result.list.filter(
+      //   elem =>
+      //     elem.obj.email === this.user.login &&
+      //     elem.obj.password === this.user.password
+      // );
+      // console.log(userAuth);
+
+      // if (userAuth.length === 0) {
+      //   this.activeButtonAdd = 'none'
+      //   this.createNewUser();
+      //   console.log(this.user.role);
+      // } else if(
+      //   this.user.login === userAuth[0].obj.email &&
+      //   this.user.password === userAuth[0].obj.password        
+      // ){
+      //     this.user.role = "user";
+      //     console.log(this.user.role);
+      //     this.activeButtonAdd = "none"        
+      // }
+
+      // if (
+      //   adminInfo.email === this.user.login &&
+      //   adminInfo.password === this.user.password
+      // ) {
+      //   this.user.role = "admin";
+      //   console.log(this.user.role);
+      //   this.activeButtonAdd = 'inline'
+      // }
+
+      // if(this.user.login !== "" && this.user.password !== ""){
+      //   this.activeAuthWindow = 'none'
+      //   this.activeTable = 'flex' 
+      // }
+
+      // this.user.role = "user";
       let newUser = await axios.post(
         "https://directual.com/good/api/v3/struct/WebUser/?appID=d35b5f25-1215-411d-8775-d49cec6b4a3f&appSecret=ubOxrtQiduM",
         {
-          role: this.user.role,
           email: this.user.login,
           password: this.user.password
         }
       );
-    },
 
-    requestForUser: async function() {
-      let getUser = await axios.post(getUserAddress, {
-        filters: [],
-        fields: "role,email,password",
-        pageSize: 10,
-        orders: []
-      });
-      console.log(getUser.data.result.list);
-      let adminInfo = getUser.data.result.list[1].obj;
-      let userAuth = getUser.data.result.list.filter(
-        elem =>
-          elem.obj.email === this.user.login &&
-          elem.obj.password === this.user.password
-      );
-      console.log(userAuth);
 
-      if (userAuth.length === 0) {
-        
-        
-        this.activeButtonAdd = 'none'
-        this.createNewUser();
-        console.log(this.user.role);
-      } else if(
-        this.user.login === userAuth[0].obj.email &&
-        this.user.password === userAuth[0].obj.password        
-      ){
-          this.user.role = "user";
-          console.log(this.user.role);
-          this.activeButtonAdd = "none"        
-      }
-
-      if (
-        adminInfo.email === this.user.login &&
-        adminInfo.password === this.user.password
-      ) {
-        this.user.role = "admin";
-        console.log(this.user.role);
-        this.activeButtonAdd = 'inline'
-      }
-
-      if(this.user.login !== "" && this.user.password !== ""){
-        this.activeAuthWindow = 'none'
-        this.activeTable = 'flex' 
-      }
 
     },
 
@@ -644,8 +653,8 @@ body {
 .authWindow {
     position: fixed;
     top: 30%;
-    left: 30%;
-    width: 32%;
+    left: 35%;
+    width: 25%;
   border: 0.5px solid #ebeef5;
   background-color: #ffffff;
   border-radius: 5px;
@@ -655,5 +664,14 @@ body {
 }
 .okButton {
   margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+.authInput{
+  width: 90%;
+}
+
+.authText{
+  font-size: 12px;
 }
 </style>
